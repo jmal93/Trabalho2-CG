@@ -61,16 +61,19 @@ static void initialize (void)
 
   TransformPtr sun_transform = Transform::Make();
   sun_transform->Scale(0.5f, 0.5f, 0.5f);
+
   TransformPtr mercury_orbit_disk_transform = Transform::Make();
   mercury_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr mercury_transform = Transform::Make();
   mercury_transform->Translate(1.0f, 0.0f, 0.0f);
   mercury_transform->Scale(0.2f, 0.2f, 0.2f);
+
   TransformPtr earth_orbit_disk_transform = Transform::Make();
   earth_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr earth_transform = Transform::Make();
   earth_transform->Translate(3.0f, 0.0f, 0.0f);
   earth_transform->Scale(0.2f, 0.2f, 0.2f);
+  
   TransformPtr moon_orbit_disk_transform = Transform::Make();
   moon_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr moon_transform = Transform::Make();
@@ -112,6 +115,9 @@ static void initialize (void)
   scene->AddEngine(Orbit::Make(earth_orbit_disk_transform, 2.5f));
   scene->AddEngine(Orbit::Make(mercury_orbit_disk_transform, 4.5f));
   scene->AddEngine(Orbit::Make(moon_orbit_disk_transform, 4.5f));
+  scene->AddEngine(Orbit::Make(earth_transform, 5.0f));
+  scene->AddEngine(Orbit::Make(moon_transform, 3.0f));
+  scene->AddEngine(Orbit::Make(mercury_transform, 7.0f));
 }
 
 static void update(float dt)
