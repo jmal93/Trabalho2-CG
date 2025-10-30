@@ -66,6 +66,8 @@ void SkyBox::Draw (StatePtr st)
   st->PushMatrix();
   st->MultMatrix(m);
   st->LoadMatrices();
+  glDisable(GL_CULL_FACE);
+  glDepthFunc(GL_LEQUAL);
   glDepthMask(GL_FALSE);
   glBindVertexArray(m_vao);
   glBindBuffer( GL_ARRAY_BUFFER, m_coord_buffer);
@@ -74,5 +76,7 @@ void SkyBox::Draw (StatePtr st)
   glBindBuffer(GL_ARRAY_BUFFER, m_coord_buffer);
   glDisableVertexAttribArray(LOC::COORD);
   glDepthMask(GL_TRUE);
+  glDepthFunc(GL_LESS);
+  glEnable(GL_CULL_FACE);
   st->PopMatrix();
 }
