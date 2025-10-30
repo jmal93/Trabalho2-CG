@@ -21,7 +21,7 @@
 #include <iostream>
 #include <cassert>
 
-static float viewer_pos[3] = {2.0f, 3.5f, 4.0f};
+static float viewer_pos[3] = {2.0f, 3.5f, 8.0f};
 
 static ScenePtr scene;
 static Camera3DPtr camera;
@@ -43,23 +43,6 @@ static void initialize (void)
   //LightPtr light = ObjLight::Make(viewer_pos[0],viewer_pos[1],viewer_pos[2]);
   LightPtr light = Light::Make(0.0f,0.0f,0.0f,1.0f,"camera");
 
-  AppearancePtr white = Material::Make(1.0f,1.0f,1.0f);
-  AppearancePtr red = Material::Make(1.0f,0.5f,0.5f);
-  AppearancePtr poff = PolygonOffset::Make(-10,-10);
-  AppearancePtr paper = Texture::Make("decal","../images/paper.jpg");
-
-  TransformPtr trf1 = Transform::Make();
-  trf1->Scale(3.0f,0.3f,3.0f);
-  trf1->Translate(0.0f,-1.0f,0.0f);
-  TransformPtr trf2 = Transform::Make();
-  trf2->Scale(0.5f,0.5f,0.5f);
-  trf2->Translate(0.0f,1.0f,0.0f);
-  TransformPtr trf3 = Transform::Make();
-  trf3->Translate(0.8f,0.0f,0.8f);
-  trf3->Rotate(30.0f,0.0f,1.0f,0.0f);
-  trf3->Rotate(90.0f,-1.0f,0.0f,0.0f);
-  trf3->Scale(0.5f,0.7f,1.0f);
-
   Error::Check("before shps");
   ShapePtr cube = Cube::Make();
   Error::Check("before quad");
@@ -67,6 +50,23 @@ static void initialize (void)
   Error::Check("before sphere");
   ShapePtr sphere = Sphere::Make();
   Error::Check("after shps");
+
+  AppearancePtr white = Material::Make(1.0f,1.0f,1.0f);
+  AppearancePtr sun_texture = Texture::Make("decal", "images/lebron.jpg");
+  AppearancePtr earth_texture = Texture::Make("decal", "images/earth.jpg");
+
+  TransformPtr sun_transform = Transform::Make();
+  sun_transform->Scale(0.5f, 0.5f, 0.5f);
+  TransformPtr earth_orbit_disk_transform = Transform::Make();
+  earth_orbit_disk_transform->Translate(3.0f, 0.0f, 0.0f);
+  TransformPtr earth_transform = Transform::Make();
+  earth_transform->Translate(0.0f, 0.0f, 0.0f);
+  earth_transform->Scale(0.2f, 0.2f, 0.2f);
+  TransformPtr mercury_orbit_disk_transform = Transform::Make();
+  mercury_orbit_disk_transform->Translate(1.5f, 0.0f, 0.0f);
+  TransformPtr mercury_transform = Transform::Make();
+  mercury_transform->Translate(0.0f, 0.0f, 0.0f);
+  mercury_transform->Scale(0.2f, 0.2f, 0.2f);
 
   // create shader
   ShaderPtr shader = Shader::Make(light,"world");
@@ -81,11 +81,19 @@ static void initialize (void)
   shd_tex->AttachFragmentShader("shaders/ilum_vert/fragment_texture.glsl");
   shd_tex->Link();
 
+  // make nodes
+  NodePtr sun = Node::Make(shd_tex, sun_transform, {white, sun_texture}, {sphere});
+  NodePtr earth = Node::Make(shd_tex, earth_transform, {white, earth_texture}, {sphere}); 
+  NodePtr earth_orbit_disk = Node::Make(earth_orbit_disk_transform, {earth});
+  NodePtr mercury = Node::Make(shd_tex, mercury_transform, {white, earth_texture}, {sphere}); 
+  NodePtr mercury_orbit_disk = Node::Make(mercury_orbit_disk_transform, {mercury});
+
   // build scene
   NodePtr root = Node::Make(shader,
-    {Node::Make(trf1,{red},{cube}),
-     Node::Make(shd_tex,trf3,{white,poff,paper},{quad}),
-     Node::Make(trf2,{white},{sphere})
+    {
+                            sun,
+                            earth_orbit_disk,
+                            mercury_orbit_disk
     }
   );
   scene = Scene::Make(root);
@@ -167,7 +175,11 @@ int main ()
   glfwSetMouseButtonCallback(win, mousebutton); // mouse button callback
   
   glfwMakeContextCurrent(win);
-#include <glad/glad.h>
+
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    std::cout << "Failed to initialize GLAD" << std::endl;
+    return -1;
+  }
   printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
   initialize();
