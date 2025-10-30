@@ -57,19 +57,25 @@ static void initialize (void)
   AppearancePtr sun_texture = Texture::Make("decal", "images/lebron.jpg");
   AppearancePtr earth_texture = Texture::Make("decal", "images/earth.jpg");
   AppearancePtr mercury_texture = Texture::Make("decal", "images/mercury.jpg");
+  AppearancePtr moon_texture = Texture::Make("decal", "images/moon.jpg");
 
   TransformPtr sun_transform = Transform::Make();
   sun_transform->Scale(0.5f, 0.5f, 0.5f);
-  TransformPtr earth_orbit_disk_transform = Transform::Make();
-  earth_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
-  TransformPtr earth_transform = Transform::Make();
-  earth_transform->Translate(3.0f, 0.0f, 0.0f);
-  earth_transform->Scale(0.2f, 0.2f, 0.2f);
   TransformPtr mercury_orbit_disk_transform = Transform::Make();
   mercury_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr mercury_transform = Transform::Make();
   mercury_transform->Translate(1.0f, 0.0f, 0.0f);
   mercury_transform->Scale(0.2f, 0.2f, 0.2f);
+  TransformPtr earth_orbit_disk_transform = Transform::Make();
+  earth_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
+  TransformPtr earth_transform = Transform::Make();
+  earth_transform->Translate(3.0f, 0.0f, 0.0f);
+  earth_transform->Scale(0.2f, 0.2f, 0.2f);
+  TransformPtr moon_orbit_disk_transform = Transform::Make();
+  moon_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
+  TransformPtr moon_transform = Transform::Make();
+  moon_transform->Translate(2.5f, 0.0f, 0.0f);
+  moon_transform->Scale(0.5f, 0.5f, 0.5f);
 
   // create shader
   ShaderPtr shader = Shader::Make(light,"world");
@@ -86,22 +92,26 @@ static void initialize (void)
 
   // make nodes
   NodePtr sun = Node::Make(shd_tex, sun_transform, {white, sun_texture}, {sphere});
-  NodePtr earth = Node::Make(shd_tex, earth_transform, {white, earth_texture}, {sphere}); 
-  NodePtr earth_orbit_disk = Node::Make(earth_orbit_disk_transform, {earth});
   NodePtr mercury = Node::Make(shd_tex, mercury_transform, {white, mercury_texture}, {sphere}); 
   NodePtr mercury_orbit_disk = Node::Make(mercury_orbit_disk_transform, {mercury});
+  NodePtr earth = Node::Make(shd_tex, earth_transform, {white, earth_texture}, {sphere}); 
+  NodePtr earth_orbit_disk = Node::Make(earth_orbit_disk_transform, {earth});
+  NodePtr moon = Node::Make(shd_tex, moon_transform, {white, moon_texture}, {sphere}); 
+  NodePtr moon_orbit_disk = Node::Make(moon_orbit_disk_transform, {moon});
+  earth->AddNode(moon_orbit_disk);
 
   // build scene
   NodePtr root = Node::Make(shader,
     {
                             sun,
+                            mercury_orbit_disk,
                             earth_orbit_disk,
-                            mercury_orbit_disk
     }
   );
   scene = Scene::Make(root);
   scene->AddEngine(Orbit::Make(earth_orbit_disk_transform, 2.5f));
   scene->AddEngine(Orbit::Make(mercury_orbit_disk_transform, 4.5f));
+  scene->AddEngine(Orbit::Make(moon_orbit_disk_transform, 4.5f));
 }
 
 static void update(float dt)
