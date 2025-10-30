@@ -43,7 +43,7 @@ static void initialize (void)
   arcball = camera->CreateArcball();
 
   //LightPtr light = ObjLight::Make(viewer_pos[0],viewer_pos[1],viewer_pos[2]);
-  LightPtr light = Light::Make(0.0f,0.0f,0.0f,1.0f,"camera");
+  LightPtr light = Light::Make(0.0f,0.0f,0.0f,1.0f,"world");
 
   Error::Check("before shps");
   ShapePtr cube = Cube::Make();
