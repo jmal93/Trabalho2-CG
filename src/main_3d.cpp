@@ -18,6 +18,8 @@
 #include "light.h"
 #include "polyoffset.h"
 #include "orbit.h"
+#include "skybox.h"
+#include "texcube.h"
 
 #include <iostream>
 #include <cassert>
@@ -51,6 +53,8 @@ static void initialize (void)
   ShapePtr quad = Quad::Make();
   Error::Check("before sphere");
   ShapePtr sphere = Sphere::Make();
+  Error::Check("before skybox");
+  auto skybox = SkyBox::Make();
   Error::Check("after shps");
 
   AppearancePtr white = Material::Make(1.0f,1.0f,1.0f);
@@ -58,6 +62,7 @@ static void initialize (void)
   AppearancePtr earth_texture = Texture::Make("decal", "images/earth.jpg");
   AppearancePtr mercury_texture = Texture::Make("decal", "images/mercury.jpg");
   AppearancePtr moon_texture = Texture::Make("decal", "images/moon.jpg");
+  AppearancePtr sky = TexCube::Make("sky", "images/skybox.png");
 
   TransformPtr sun_transform = Transform::Make();
   sun_transform->Scale(0.5f, 0.5f, 0.5f);
@@ -86,6 +91,12 @@ static void initialize (void)
   shader->AttachFragmentShader("shaders/ilum_vert/fragment.glsl");
   shader->Link();
 
+  // sky shader
+  ShaderPtr shd_sky = Shader::Make();
+  shd_sky->AttachVertexShader("shaders/skybox/vertex.glsl");
+  shd_sky->AttachFragmentShader("shaders/skybox/fragment.glsl");
+  shd_sky->Link();
+
   // Define a different shader for texture mapping
   // An alternative would be to use only this shader with a "white" texture for untextured objects
   ShaderPtr shd_tex = Shader::Make(light,"world");
@@ -101,6 +112,7 @@ static void initialize (void)
   NodePtr earth_orbit_disk = Node::Make(earth_orbit_disk_transform, {earth});
   NodePtr moon = Node::Make(shd_tex, moon_transform, {white, moon_texture}, {sphere}); 
   NodePtr moon_orbit_disk = Node::Make(moon_orbit_disk_transform, {moon});
+  NodePtr sky_node = Node::Make(shd_sky, {sky}, {std::static_pointer_cast<Shape>(skybox) });
   earth->AddNode(moon_orbit_disk);
 
   // build scene
@@ -109,6 +121,7 @@ static void initialize (void)
                             sun,
                             mercury_orbit_disk,
                             earth_orbit_disk,
+                            sky_node
     }
   );
   scene = Scene::Make(root);
