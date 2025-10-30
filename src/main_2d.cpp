@@ -13,6 +13,7 @@
 #include "quad.h"
 #include "triangle.h"
 #include "disk.h"
+#include "orbit.h"
 
 #include <initializer_list>
 #include <iostream>
@@ -20,28 +21,6 @@
 
 static ScenePtr scene;
 static CameraPtr camera;
-
-class Orbit;
-using OrbitPtr = std::shared_ptr<Orbit>;
-class Orbit : public Engine 
-{
-  TransformPtr m_trf;
-  float m_speed;
-protected:
-  Orbit (TransformPtr trf, float speed) 
-  : m_trf(trf), m_speed(speed) 
-  {
-  }
-public:
-  static OrbitPtr Make (TransformPtr trf, float speed)
-  {
-    return OrbitPtr(new Orbit(trf, speed));
-  }
-  virtual void Update (float dt)
-  {
-    m_trf->Rotate(m_speed * (-dt)/30.0f*180.0f,0,0,1);
-  }
-};
 
 static void initialize (void)
 {
