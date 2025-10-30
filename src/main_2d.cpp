@@ -34,11 +34,9 @@ static void initialize (void)
 
   auto trf_moon_orbit_disk = Transform::Make();
   trf_moon_orbit_disk->Translate(0.0f, 0.0f, 0.0f);
-
   auto trf_moon = Transform::Make();
   trf_moon->Translate(2.5f, 0.0f, 0.0f);
   trf_moon->Scale(0.4f, 0.4f, 1.0f);
-
   auto moon_orbit_disk = Node::Make(
     trf_moon_orbit_disk, {Node::Make(trf_moon, {Color::Make(190, 190, 190), Texture::Make("tex", "images/moon.jpg")}, {Disk::Make()})}
   );
@@ -48,7 +46,6 @@ static void initialize (void)
   trf_earth->Scale(0.3f, 0.3f, 1.0f);
   auto earth = Node::Make(trf_earth, {Color:: Make(1, 1, 1), Texture::Make("tex", "images/earth.jpg")}, {Disk::Make()});
   earth->AddNode(moon_orbit_disk);
-
   auto trf_earth_orbit_disk = Transform::Make();
   trf_earth_orbit_disk->Translate(5.0f, 5.0f, 0.0f);
   auto earth_orbit_disk = Node::Make(trf_earth_orbit_disk, {earth});
@@ -57,7 +54,6 @@ static void initialize (void)
   trf_mercury->Translate(2.5f, 0.0f, 1.0f);
   trf_mercury->Scale(0.25f, 0.25f, 1.0f);
   auto mercury = Node::Make(trf_mercury, {Color::Make(0.7f, 0.7f, 0.7f), Texture::Make("tex", "images/mercury.jpg")}, {Disk::Make()});
-
   auto trf_mercury_orbit_disk = Transform::Make();
   trf_mercury_orbit_disk->Translate(5.0f, 5.0f, 0.0f);
   auto mercury_orbit_disk = Node::Make(trf_mercury_orbit_disk, {mercury});

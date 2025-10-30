@@ -17,9 +17,11 @@
 #include "light.h"
 #include "light.h"
 #include "polyoffset.h"
+#include "orbit.h"
 
 #include <iostream>
 #include <cassert>
+#include <ostream>
 
 static float viewer_pos[3] = {2.0f, 3.5f, 8.0f};
 
@@ -54,18 +56,19 @@ static void initialize (void)
   AppearancePtr white = Material::Make(1.0f,1.0f,1.0f);
   AppearancePtr sun_texture = Texture::Make("decal", "images/lebron.jpg");
   AppearancePtr earth_texture = Texture::Make("decal", "images/earth.jpg");
+  AppearancePtr mercury_texture = Texture::Make("decal", "images/mercury.jpg");
 
   TransformPtr sun_transform = Transform::Make();
   sun_transform->Scale(0.5f, 0.5f, 0.5f);
   TransformPtr earth_orbit_disk_transform = Transform::Make();
-  earth_orbit_disk_transform->Translate(3.0f, 0.0f, 0.0f);
+  earth_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr earth_transform = Transform::Make();
-  earth_transform->Translate(0.0f, 0.0f, 0.0f);
+  earth_transform->Translate(3.0f, 0.0f, 0.0f);
   earth_transform->Scale(0.2f, 0.2f, 0.2f);
   TransformPtr mercury_orbit_disk_transform = Transform::Make();
-  mercury_orbit_disk_transform->Translate(1.5f, 0.0f, 0.0f);
+  mercury_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr mercury_transform = Transform::Make();
-  mercury_transform->Translate(0.0f, 0.0f, 0.0f);
+  mercury_transform->Translate(1.0f, 0.0f, 0.0f);
   mercury_transform->Scale(0.2f, 0.2f, 0.2f);
 
   // create shader
@@ -85,7 +88,7 @@ static void initialize (void)
   NodePtr sun = Node::Make(shd_tex, sun_transform, {white, sun_texture}, {sphere});
   NodePtr earth = Node::Make(shd_tex, earth_transform, {white, earth_texture}, {sphere}); 
   NodePtr earth_orbit_disk = Node::Make(earth_orbit_disk_transform, {earth});
-  NodePtr mercury = Node::Make(shd_tex, mercury_transform, {white, earth_texture}, {sphere}); 
+  NodePtr mercury = Node::Make(shd_tex, mercury_transform, {white, mercury_texture}, {sphere}); 
   NodePtr mercury_orbit_disk = Node::Make(mercury_orbit_disk_transform, {mercury});
 
   // build scene
@@ -97,6 +100,13 @@ static void initialize (void)
     }
   );
   scene = Scene::Make(root);
+  scene->AddEngine(Orbit::Make(earth_orbit_disk_transform, 2.5f));
+  scene->AddEngine(Orbit::Make(mercury_orbit_disk_transform, 4.5f));
+}
+
+static void update(float dt)
+{
+  scene->Update(dt);
 }
 
 static void display (GLFWwindow* win)
@@ -184,7 +194,11 @@ int main ()
 
   initialize();
 
+  float t0 = float(glfwGetTime());
   while(!glfwWindowShouldClose(win)) {
+    float t = float(glfwGetTime());
+    update(t - t0);
+    t0 = t;
     display(win);
     glfwSwapBuffers(win);
     glfwPollEvents();

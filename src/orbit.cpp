@@ -7,5 +7,5 @@ OrbitPtr Orbit::Make(TransformPtr trf, float speed) {
 }
 
 void Orbit::Update(float dt) {
-  m_trf->Rotate(m_speed * (-dt) / 30.0f * 180.0f, 0, 0, 1);
+  m_trf->Rotate(m_speed * (-dt) / 30.0f * 180.0f, 0, 1, 0);
 }
