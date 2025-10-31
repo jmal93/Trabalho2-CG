@@ -20,6 +20,7 @@
 #include "orbit.h"
 #include "skybox.h"
 #include "texcube.h"
+#include "cameratarget.h"
 
 #include <iostream>
 #include <cassert>
@@ -30,6 +31,8 @@ static float viewer_pos[3] = {2.0f, 3.5f, 8.0f};
 static ScenePtr scene;
 static Camera3DPtr camera;
 static ArcballPtr arcball;
+
+static CameraTargetPtr camera_target_engine;
 
 static void initialize (void)
 {
@@ -115,6 +118,12 @@ static void initialize (void)
   NodePtr sky_node = Node::Make(shd_sky, {sky}, {std::static_pointer_cast<Shape>(skybox) });
   earth->AddNode(moon_orbit_disk);
 
+  // add os nós com oreferência para o target
+  NodePtr sun_target = sun;
+  NodePtr mercury_target = mercury;
+  NodePtr earth_target = earth;
+  NodePtr moon_target = moon;
+
   // build scene
   NodePtr root = Node::Make(shader,
     {
@@ -131,11 +140,16 @@ static void initialize (void)
   scene->AddEngine(Orbit::Make(earth_transform, 5.0f));
   scene->AddEngine(Orbit::Make(moon_transform, 3.0f));
   scene->AddEngine(Orbit::Make(mercury_transform, 7.0f));
+
+  camera_target_engine = CameraTarget::Make(camera, sun_target, mercury_target, earth_target, moon_target);
+  scene->AddEngine(camera_target_engine);
 }
 
 static void update(float dt)
 {
   scene->Update(dt);
+
+  //lógica para a troca de alvo da
 }
 
 static void display (GLFWwindow* win)
@@ -157,6 +171,14 @@ static void keyboard (GLFWwindow* window, int key, int scancode, int action, int
 {
   if (key == GLFW_KEY_Q && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  else if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Sun;
+  else if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Mercury;
+  else if (key == GLFW_KEY_2 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Earth;
+  else if (key == GLFW_KEY_3 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Moon;
 }
 
 static void resize (GLFWwindow* win, int width, int height)

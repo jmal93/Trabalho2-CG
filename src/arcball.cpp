@@ -78,3 +78,10 @@ const glm::mat4& Arcball::GetMatrix () const
 {
   return m_mat;
 }
+
+void Arcball::Reset ()
+{
+  m_mat = glm::mat4(1.0f);
+  m_x0 = 0;
+  m_y0 = 0;
+}

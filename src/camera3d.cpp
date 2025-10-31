@@ -108,7 +108,16 @@ glm::mat4 Camera3D::GetViewMatrix () const
     view = view * m_arcball->GetMatrix();
   view = view * glm::lookAt(m_eye,m_center,m_up);
   if (m_reference)
-      view = view * glm::inverse(m_reference->GetModelMatrix());
+  {
+    // Conta maluca para resolver um bug
+    glm::mat4 ref_model = m_reference->GetModelMatrix();
+      
+    glm::vec3 target_pos = glm::vec3(ref_model[3]);
+    
+    glm::mat4 inv_translation = glm::translate(glm::mat4(1.0f), -target_pos);
+
+    view = view * inv_translation;
+  }
   return view;
 }
 

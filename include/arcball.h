@@ -18,6 +18,7 @@ public:
   void InitMouseMotion (int x, int y);
   void AccumulateMouseMotion (int x, int y);
   const glm::mat4& GetMatrix () const;
+  void Reset ();
 };
 
 #endif
