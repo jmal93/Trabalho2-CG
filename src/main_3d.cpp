@@ -18,6 +18,9 @@
 #include "light.h"
 #include "polyoffset.h"
 #include "orbit.h"
+#include "skybox.h"
+#include "texcube.h"
+#include "cameratarget.h"
 
 #include <iostream>
 #include <cassert>
@@ -28,6 +31,8 @@ static float viewer_pos[3] = {2.0f, 3.5f, 8.0f};
 static ScenePtr scene;
 static Camera3DPtr camera;
 static ArcballPtr arcball;
+
+static CameraTargetPtr camera_target_engine;
 
 static void initialize (void)
 {
@@ -51,6 +56,8 @@ static void initialize (void)
   ShapePtr quad = Quad::Make();
   Error::Check("before sphere");
   ShapePtr sphere = Sphere::Make();
+  Error::Check("before skybox");
+  auto skybox = SkyBox::Make();
   Error::Check("after shps");
 
   AppearancePtr white = Material::Make(1.0f,1.0f,1.0f);
@@ -58,19 +65,23 @@ static void initialize (void)
   AppearancePtr earth_texture = Texture::Make("decal", "images/earth.jpg");
   AppearancePtr mercury_texture = Texture::Make("decal", "images/mercury.jpg");
   AppearancePtr moon_texture = Texture::Make("decal", "images/moon.jpg");
+  AppearancePtr sky = TexCube::Make("sky", "images/skybox.png");
 
   TransformPtr sun_transform = Transform::Make();
   sun_transform->Scale(0.5f, 0.5f, 0.5f);
+
   TransformPtr mercury_orbit_disk_transform = Transform::Make();
   mercury_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr mercury_transform = Transform::Make();
   mercury_transform->Translate(1.0f, 0.0f, 0.0f);
   mercury_transform->Scale(0.2f, 0.2f, 0.2f);
+
   TransformPtr earth_orbit_disk_transform = Transform::Make();
   earth_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr earth_transform = Transform::Make();
   earth_transform->Translate(3.0f, 0.0f, 0.0f);
   earth_transform->Scale(0.2f, 0.2f, 0.2f);
+  
   TransformPtr moon_orbit_disk_transform = Transform::Make();
   moon_orbit_disk_transform->Translate(0.0f, 0.0f, 0.0f);
   TransformPtr moon_transform = Transform::Make();
@@ -82,6 +93,12 @@ static void initialize (void)
   shader->AttachVertexShader("shaders/ilum_vert/vertex.glsl");
   shader->AttachFragmentShader("shaders/ilum_vert/fragment.glsl");
   shader->Link();
+
+  // sky shader
+  ShaderPtr shd_sky = Shader::Make();
+  shd_sky->AttachVertexShader("shaders/skybox/vertex.glsl");
+  shd_sky->AttachFragmentShader("shaders/skybox/fragment.glsl");
+  shd_sky->Link();
 
   // Define a different shader for texture mapping
   // An alternative would be to use only this shader with a "white" texture for untextured objects
@@ -98,7 +115,14 @@ static void initialize (void)
   NodePtr earth_orbit_disk = Node::Make(earth_orbit_disk_transform, {earth});
   NodePtr moon = Node::Make(shd_tex, moon_transform, {white, moon_texture}, {sphere}); 
   NodePtr moon_orbit_disk = Node::Make(moon_orbit_disk_transform, {moon});
+  NodePtr sky_node = Node::Make(shd_sky, {sky}, {std::static_pointer_cast<Shape>(skybox) });
   earth->AddNode(moon_orbit_disk);
+
+  // add os nós com oreferência para o target
+  NodePtr sun_target = sun;
+  NodePtr mercury_target = mercury;
+  NodePtr earth_target = earth;
+  NodePtr moon_target = moon;
 
   // build scene
   NodePtr root = Node::Make(shader,
@@ -106,17 +130,26 @@ static void initialize (void)
                             sun,
                             mercury_orbit_disk,
                             earth_orbit_disk,
+                            sky_node
     }
   );
   scene = Scene::Make(root);
   scene->AddEngine(Orbit::Make(earth_orbit_disk_transform, 2.5f));
   scene->AddEngine(Orbit::Make(mercury_orbit_disk_transform, 4.5f));
   scene->AddEngine(Orbit::Make(moon_orbit_disk_transform, 4.5f));
+  scene->AddEngine(Orbit::Make(earth_transform, 5.0f));
+  scene->AddEngine(Orbit::Make(moon_transform, 3.0f));
+  scene->AddEngine(Orbit::Make(mercury_transform, 7.0f));
+
+  camera_target_engine = CameraTarget::Make(camera, sun_target, mercury_target, earth_target, moon_target);
+  scene->AddEngine(camera_target_engine);
 }
 
 static void update(float dt)
 {
   scene->Update(dt);
+
+  //lógica para a troca de alvo da
 }
 
 static void display (GLFWwindow* win)
@@ -138,6 +171,14 @@ static void keyboard (GLFWwindow* window, int key, int scancode, int action, int
 {
   if (key == GLFW_KEY_Q && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  else if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Sun;
+  else if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Mercury;
+  else if (key == GLFW_KEY_2 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Earth;
+  else if (key == GLFW_KEY_3 && action == GLFW_PRESS)
+    camera_target_engine->m_current_target = Moon;
 }
 
 static void resize (GLFWwindow* win, int width, int height)
