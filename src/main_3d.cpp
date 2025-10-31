@@ -61,7 +61,7 @@ static void initialize (void)
   Error::Check("after shps");
 
   AppearancePtr white = Material::Make(1.0f,1.0f,1.0f);
-  AppearancePtr sun_texture = Texture::Make("decal", "images/lebron.jpg");
+  AppearancePtr sun_texture = Texture::Make("decal", "images/sun.jpg");
   AppearancePtr earth_texture = Texture::Make("decal", "images/earth.jpg");
   AppearancePtr mercury_texture = Texture::Make("decal", "images/mercury.jpg");
   AppearancePtr moon_texture = Texture::Make("decal", "images/moon.jpg");
